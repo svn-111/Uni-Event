@@ -3,8 +3,12 @@ package com.geekster.project.assignment.UniversityEventManagement.Controller;
 import com.geekster.project.assignment.UniversityEventManagement.Model.Department;
 import com.geekster.project.assignment.UniversityEventManagement.Model.Event;
 import com.geekster.project.assignment.UniversityEventManagement.Model.Student;
+import com.geekster.project.assignment.UniversityEventManagement.Model.User;
 import com.geekster.project.assignment.UniversityEventManagement.Service.EventService;
 import com.geekster.project.assignment.UniversityEventManagement.Service.StudentService;
+import com.geekster.project.assignment.UniversityEventManagement.Service.RegistrationService;
+import com.geekster.project.assignment.UniversityEventManagement.Service.UserService;
+import com.geekster.project.assignment.UniversityEventManagement.Model.Registration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,6 +18,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
+import java.util.HashMap;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Controller
 public class WebController {
@@ -24,25 +32,109 @@ public class WebController {
     @Autowired
     private EventService eventService;
 
+    @Autowired
+    private RegistrationService registrationService;
+
+    @Autowired
+    private UserService userService;
+
     @GetMapping("/")
     public String home(Model model) {
         return "index";
     }
 
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
+
+    @GetMapping("/signup")
+    public String signup(Model model) {
+        model.addAttribute("user", new User());
+        return "signup";
+    }
+
+    @PostMapping("/signup")
+    public String processSignup(@ModelAttribute("user") User user, Model model) {
+        boolean registered = userService.registerUser(user);
+        if (registered) {
+            return "redirect:/login?signup";
+        } else {
+            model.addAttribute("error", "Username or email already exists");
+            return "signup";
+        }
+    }
+
+    @GetMapping("/profile")
+    public String profile(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) return "redirect:/login";
+        User user = userService.findByUsername(userDetails.getUsername());
+        model.addAttribute("user", user);
+        return "profile";
+    }
+
+    @PostMapping("/profile")
+    public String updateProfile(@ModelAttribute("user") User formUser, @AuthenticationPrincipal UserDetails userDetails, Model model) {
+        if (userDetails == null) return "redirect:/login";
+        User user = userService.findByUsername(userDetails.getUsername());
+        boolean updated = userService.updateProfile(user.getId(), formUser.getFirstName(), formUser.getLastName(), formUser.getEmail(), formUser.getPassword());
+        if (updated) {
+            model.addAttribute("success", "Profile updated successfully.");
+        } else {
+            model.addAttribute("error", "Failed to update profile.");
+        }
+        // Reload user data
+        user = userService.findByUsername(userDetails.getUsername());
+        model.addAttribute("user", user);
+        return "profile";
+    }
+
     @GetMapping("/students")
-    public String studentsPage(Model model) {
-        Iterable<Student> students = studentService.getAllStudents();
+    public String studentsPage(
+            @RequestParam(value = "query", required = false) String query,
+            @RequestParam(value = "department", required = false) Department department,
+            @RequestParam(value = "sort", required = false, defaultValue = "universityId") String sort,
+            @RequestParam(value = "dir", required = false, defaultValue = "asc") String dir,
+            Model model) {
+        List<Student> students;
+        boolean asc = dir.equalsIgnoreCase("asc");
+        if (query != null && !query.isEmpty() && department != null) {
+            students = studentService.searchAndFilter(department, query);
+        } else if (query != null && !query.isEmpty()) {
+            students = studentService.searchStudents(query);
+        } else if (department != null) {
+            students = studentService.filterByDepartment(department);
+        } else {
+            students = studentService.getAllStudentsSorted(sort, asc);
+        }
         model.addAttribute("students", students);
         model.addAttribute("departments", Department.values());
         model.addAttribute("newStudent", new Student());
+        model.addAttribute("query", query);
+        model.addAttribute("selectedDepartment", department);
+        model.addAttribute("sort", sort);
+        model.addAttribute("dir", dir);
         return "students";
     }
 
     @GetMapping("/events")
     public String eventsPage(Model model) {
         Iterable<Event> events = eventService.getAllEvents();
+        Iterable<Student> students = studentService.getAllStudents();
         model.addAttribute("events", events);
+        model.addAttribute("students", students);
         model.addAttribute("newEvent", new Event());
+        // For each event, add attendee list and available seats
+        Map<Integer, List<Student>> eventAttendees = new HashMap<>();
+        Map<Integer, Long> eventRegistrationCounts = new HashMap<>();
+        for (Event event : events) {
+            List<Registration> regs = registrationService.getRegistrationsForEvent(event);
+            List<Student> attendees = regs.stream().map(Registration::getStudent).toList();
+            eventAttendees.put(event.getEventId(), attendees);
+            eventRegistrationCounts.put(event.getEventId(), registrationService.getRegistrationCountForEvent(event));
+        }
+        model.addAttribute("eventAttendees", eventAttendees);
+        model.addAttribute("eventRegistrationCounts", eventRegistrationCounts);
         return "events";
     }
 
@@ -69,11 +161,11 @@ public class WebController {
     }
 
     @PostMapping("/students/update-department")
-    public String updateStudentDepartment(@RequestParam Integer studentId, 
+    public String updateStudentDepartment(@RequestParam Integer universityId, 
                                         @RequestParam Department department, 
                                         RedirectAttributes redirectAttributes) {
         try {
-            String result = studentService.updateStudentDepartment(studentId, department);
+            String result = studentService.updateStudentDepartment(universityId, department);
             redirectAttributes.addFlashAttribute("successMessage", result);
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error updating student: " + e.getMessage());
@@ -95,9 +187,9 @@ public class WebController {
     }
 
     @PostMapping("/students/delete")
-    public String deleteStudent(@RequestParam Integer studentId, RedirectAttributes redirectAttributes) {
+    public String deleteStudent(@RequestParam Integer universityId, RedirectAttributes redirectAttributes) {
         try {
-            String result = studentService.removeStudentById(studentId);
+            String result = studentService.removeStudentById(universityId);
             redirectAttributes.addFlashAttribute("successMessage", result);
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error deleting student: " + e.getMessage());
@@ -120,7 +212,7 @@ public class WebController {
     public String updateStudent(@ModelAttribute Student student, RedirectAttributes redirectAttributes) {
         try {
             // Use the service to update all fields
-            Optional<Student> existingOpt = studentService.getStudentById(student.getStudentId());
+            Optional<Student> existingOpt = studentService.getStudentById(student.getUniversityId());
             if (existingOpt.isPresent()) {
                 Student existing = existingOpt.get();
                 existing.setFirstName(student.getFirstName());
@@ -156,6 +248,23 @@ public class WebController {
             }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error updating event: " + e.getMessage());
+        }
+        return "redirect:/events";
+    }
+
+    @PostMapping("/events/register")
+    public String registerStudentForEvent(@RequestParam Integer universityId, @RequestParam Integer eventId, RedirectAttributes redirectAttributes) {
+        Optional<Student> studentOpt = studentService.getStudentById(universityId);
+        Optional<Event> eventOpt = eventService.getEventById(eventId);
+        if (studentOpt.isPresent() && eventOpt.isPresent()) {
+            boolean success = registrationService.registerStudentForEvent(studentOpt.get(), eventOpt.get());
+            if (success) {
+                redirectAttributes.addFlashAttribute("successMessage", "Student registered for event successfully.");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "Registration failed: already registered or event is full.");
+            }
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "Invalid student or event.");
         }
         return "redirect:/events";
     }

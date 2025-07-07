@@ -15,8 +15,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "Student")
 public class Student {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer studentId;
+    private Integer universityId;
 
     @Pattern(regexp = "^[A-Z][a-zA-Z]*$", message = "Only alphabets are allowed with the first letter as capital")
     private String firstName;
@@ -30,7 +29,6 @@ public class Student {
 
     @Enumerated(EnumType.STRING)
     private Department studentDepartment;
-
 }
 
 /*

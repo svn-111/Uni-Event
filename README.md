@@ -1,513 +1,161 @@
-# <h1 align="center"> University Event Management </h1>
-___
-<p align="center">
-<a href="Java url">
-    <img alt="Java" src="https://img.shields.io/badge/Java->=8-darkblue.svg" />
-</a>
-<a href="Maven url" >
-    <img alt="Maven" src="https://img.shields.io/badge/maven-4.0-brightgreen.svg" />
-</a>
-<a href="Spring Boot url" >
-    <img alt="Spring Boot" src="https://img.shields.io/badge/Spring Boot-3.1.4-brightgreen.svg" />
-</a>
-<a href="License url" >
-        <img alt="BSD Clause 3" src="https://img.shields.io/badge/License-BSD_3--Clause-blue.svg"/>
-    </a>
-</a>
-</p>
+# Uni-Event
+
+**Uni-Event** is a modern, full-stack University Event Management system built with Spring Boot, Thymeleaf, Bootstrap, and PostgreSQL. It streamlines university event scheduling, student management, and user authentication with a professional, user-friendly web interface.
 
 ---
 
-<p align="left">
+## Features
 
-## Overview
+### User Authentication & Profile
+- **Signup & Login:** Secure registration and login with hashed passwords.
+- **Profile Management:** Users can update their first name, last name, email, and password.
+- **Database-backed Users:** All user data is stored in PostgreSQL (no in-memory users).
+- **Session-based Security:** Only authenticated users can access the app.
+- **Logout:** Secure logout from the navbar.
 
-This project, named "University Event Management," is a powerful Spring Boot application designed to streamline the organization and coordination of university events and student information. This system features secure data storage using an H2 Database, strict validation checks on student attributes, and efficient endpoints for adding, updating, and retrieving student and event records. Manage your university's events effortlessly with the user-friendly application, ensuring accurate event details and student information.
+### Event Management
+- **Add/Edit/Delete Events:** Create, update, and remove events with details like name, location, date, time, and capacity.
+- **Event List & Filtering:** View all events, filter by date, and see event details.
+- **Event Registration:** Register students for events, with capacity checks and attendee lists.
+- **Attendee Management:** View and manage event attendees.
+
+### Student Management
+- **Add/Edit/Delete Students:** Manage student records with unique Student ID, name, age, and department.
+- **Search, Filter, Sort:** Find students by ID or name, filter and sort the student list.
+
+### Modern UI/UX
+- **Thymeleaf & Bootstrap:** Responsive, professional design with modals, cards, and modern forms.
+- **Navigation:** Clean navbar with Home, Students, Events, Profile, and Logout.
+- **Flash Messages:** User feedback for actions (success, error, etc.).
+- **Profile Page:** Avatar, sectioning, and easy-to-use update form.
+
+### Database
+- **PostgreSQL:** All data is persisted in a PostgreSQL database.
+- **JPA/Hibernate:** Automatic schema management and entity relationships.
+
+---
 
 ## Technologies Used
 
-- **Framework:** Spring Boot
-- **Language:** Java
-- **Build Tool:** Maven
-
-## Dependencies
-
-
-The project relies on the following dependencies, each serving a specific purpose in the application:
-
-1. **Spring Boot Starter Data JPA**
-   - **Description:** Provides support for JPA (Java Persistence API) and simplifies database access using Spring Data repositories.
-   - **Maven Dependency:**
-     ```xml
-     <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-data-jpa</artifactId>
-     </dependency>
-     ```
-
-2. **Spring Boot Starter Validation**
-   - **Description:** Includes validation support for request data binding and response data rendering.
-   - **Maven Dependency:**
-     ```xml
-     <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-validation</artifactId>
-     </dependency>
-     ```
-
-3. **Spring Boot Starter Web**
-   - **Description:** Provides support for building web applications, including RESTful APIs.
-   - **Maven Dependency:**
-     ```xml
-     <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-web</artifactId>
-     </dependency>
-     ```
-
-4. **H2 Database (Runtime Dependency)**
-   - **Description:** An in-memory database for development and testing purposes.
-   - **Maven Dependency:**
-     ```xml
-     <dependency>
-         <groupId>com.h2database</groupId>
-         <artifactId>h2</artifactId>
-         <scope>runtime</scope>
-     </dependency>
-     ```
-
-5. **Project Lombok (Optional)**
-   - **Description:** A library that simplifies Java code by reducing boilerplate code, such as getters and setters.
-   - **Maven Dependency:**
-     ```xml
-     <dependency>
-         <groupId>org.projectlombok</groupId>
-         <artifactId>lombok</artifactId>
-         <optional>true</optional>
-     </dependency>
-     ```
-
-6. **Spring Boot Starter Test (For Testing)**
-   - **Description:** Provides support for testing Spring Boot applications.
-   - **Maven Dependency (Test Scope):**
-     ```xml
-     <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-test</artifactId>
-         <scope>test</scope>
-     </dependency>
-     ```
-
-
-## Data Validation in the Model Layer
-
-The project enforces rigorous data validation in the model layer to maintain data integrity and consistency. Below are the key data validations applied to the student and event models:
-
-### Student Model
-
-#### Student ID
-
-- **Validation:** Auto-generated by the database (Primary Key)
-- **Description:** The `studentId` is automatically generated by the database and serves as the primary key for student records.
-
-#### First Name and Last Name
-
-- **Validation:** `@Pattern(regexp = "^[A-Z][a-zA-Z]*$", message = "Only alphabets are allowed with the first letter as capital")`
-- **Description:** The `firstName` and `lastName` fields must start with a capital letter and contain only alphabetic characters.
-
-#### Age
-
-- **Validation:** `@Min(value = 18)`, `@Max(value = 25)`
-- **Description:** The `age` field must be between 18 and 25.
-
-#### Department
-
-- **Validation:** Enumerated values (ME, ECE, CIVIL, CSE)
-- **Description:** The `studentDepartment` field must have one of the predefined department values: ME, ECE, CIVIL, CSE.
-
-### Event Model
-
-#### Event ID
-
-- **Validation:** Auto-generated by the database (Primary Key)
-- **Description:** The `eventId` is automatically generated by the database and serves as the primary key for event records.
-
-#### Event Name
-
-- **Validation:** None
-- **Description:** The `eventName` field does not have additional validation as it represents the name of the event.
-
-#### Location of Event
-
-- **Validation:** None
-- **Description:** The `locationOfEvent` field does not have additional validation as it represents the location of the event.
-
-#### Date
-
-- **Validation:** None
-- **Description:** The `eventDate` field does not have additional validation as it represents the date of the event.
-
-#### Start Time and End Time
-
-- **Validation:** None
-- **Description:** The `startTime` and `endTime` fields do not have additional validation as they represent the event's start and end times.
-
-These comprehensive data validations ensure that the university event management system captures accurate and reliable information.
-
-## Data Flow
-
-### Controller
-
-The Controller layer is responsible for handling incoming HTTP requests and delegating them to the appropriate services. It defines API endpoints for various operations on student and event records.
-
-```java
-@RestController
-public class StudentController {
-    @Autowired
-    StudentService studentService;
-
-    // Add a student
-    @PostMapping("student")
-    public String addAStudent(@RequestBody Student student) {
-        return studentService.addAStudent(student);
-    }
-
-    // Get all students
-    @GetMapping("students")
-    public Iterable<Student> getAllStudents() {
-        return studentService.getAllStudents();
-    }
-
-    // ...
-}
-```
-#### Student Controller
-
-1. **Add Student**
-
-   - **Endpoint:** `POST /student`
-   - **Description:** Add a new student to the system.
-
-2. **Add Students**
-
-   - **Endpoint:** `POST /students`
-   - **Description:** Add multiple students to the system at once.
-
-3. **Get All Students**
-
-   - **Endpoint:** `GET /students`
-   - **Description:** Retrieve a list of all student records.
-
-4. **Get Student by ID**
-
-   - **Endpoint:** `GET /student/{studentId}`
-   - **Description:** Retrieve a specific student's details by providing their `studentId` in the URL.
-
-5. **Update Student Department**
-
-   - **Endpoint:** `PUT /student/{studentId}/{department}`
-   - **Description:** Update a student's department by providing their `studentId` and the new `department` in the URL.
-
-6. **Delete Student by ID**
-
-   - **Endpoint:** `DELETE /student/{studentId}`
-   - **Description:** Remove a student from the system by specifying their `studentId` in the URL.
-
-#### Event Controller
-
-1. **Add Event**
-
-   - **Endpoint:** `POST /event`
-   - **Description:** Add a new event to the system.
-
-2. **Add Events**
-
-   - **Endpoint:** `POST /events`
-   - **Description:** Add multiple events to the system at once.
-
-3. **Get All Events**
-
-   - **Endpoint:** `GET /events`
-   - **Description:** Retrieve a list of all event records.
-
-4. **Get Event by ID**
-
-   - **Endpoint:** `GET /event/{eventId}`
-   - **Description:** Retrieve details of a specific event by providing its `eventId` in the URL.
-
-5. **Get Events on the Same Date**
-
-   - **Endpoint:** `GET /events/date`
-   - **Request Parameter:** `date` (e.g., 2023-09-20)
-   - **Description:** Retrieve a list of events that occur on the specified date by providing the date as a request parameter.
-
-6. **Update Event Location by ID**
-
-   - **Endpoint:** `PUT /event/id/{eventId}/location/{loc}`
-   - **Description:** Update the location of a specific event by providing its `eventId` and the new `loc` (location) in the URL.
-
-7. **Delete Event by ID**
-
-   - **Endpoint:** `DELETE /event/{eventId}`
-   - **Description:** Remove an event from the system by specifying its `eventId` in the URL.
-
-### Services
-
-The Services layer implements the core business logic, data processing, and interaction with the data repository. It handles data validations, CRUD operations on student and event data, and data transformations.
-
-```java
-@Service
-public class StudentService {
-    @Autowired
-    IStudentRepo studentRepo;
-
-    public String addAStudent(Student student) {
-        studentRepo.save(student);
-        return "A student is added!";
-    }
-
-    // Get all students
-    public Iterable<Student> getAllStudents() {
-        return studentRepo.findAll();
-    }
-
-    // ...
-}
+- **Java 17+**
+- **Spring Boot** (Web, Security, Data JPA)
+- **Spring Security** (Authentication & Authorization)
+- **Spring Data JPA** (ORM)
+- **Thymeleaf** (Server-side HTML rendering)
+- **Bootstrap 5** (Responsive UI)
+- **PostgreSQL** (Database)
+- **Hibernate** (JPA implementation)
+- **Lombok** (for model boilerplate)
+- **Maven** (Build tool)
+- **Jakarta Persistence API** (JPA annotations)
+- **Bootstrap Icons** (UI icons)
+
+---
+
+## Setup Instructions
+
+### 1. Clone the Repository
+```bash
+git clone <your-repo-url>
+cd University-Event-Management-main
 ```
 
-#### Student Service
+### 2. Configure PostgreSQL
 
-- **Get All Students:** Retrieve a list of all student records.
+- Ensure PostgreSQL is installed and running.
+- Create a database:
+  ```sql
+  CREATE DATABASE unieventdb;
+  ```
+- (Optional) Create a user and grant privileges:
+  ```sql
+  CREATE USER unieventuser WITH PASSWORD 'yourpassword';
+  GRANT ALL PRIVILEGES ON DATABASE unieventdb TO unieventuser;
+  ```
 
-- **Get Student by ID:** Retrieve details of a specific student by `studentId`.
+### 3. Update `application.properties`
 
-- **Add Student:** Add a new student to the system.
+Edit `src/main/resources/application.properties`:
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/unieventdb
+spring.datasource.username=unieventuser
+spring.datasource.password=yourpassword
+spring.datasource.driver-class-name=org.postgresql.Driver
 
-- **Add Students:** Add multiple students to the system at once.
-
-- **Update Student Department:** Update a student's department by `studentId`.
-
-- **Delete Student by ID:** Remove a student from the system by `studentId`.
-
-#### Event Service
-
-- **Get All Events:** Retrieve a list of all event records.
-
-- **Get Event by ID:** Retrieve details of a specific event by `eventId`.
-
-- **Add Event:** Add a new event to the system.
-
-- **Add Events:** Add multiple events to the system at once.
-
-- **Get Events on the Same Date:** Retrieve events that occur on the specified date.
-
-- **Update Event Location by ID:** Update the location of a specific event by `eventId`.
-
-- **Delete Event by ID:** Remove an event from the system by `eventId`.
-
-### Repository
-
-The Repository layer manages data access to the underlying H2 Database. It manages data access to the underlying database using Spring Data repositories. It handles database operations such as Create, Read, Update, and Delete (CRUD) for student and event data.
-
-
-```java
-@Repository
-public interface IStudentRepo extends CrudRepository<Student, Integer> {
-    // Custom query methods can be added here
-}
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 ```
 
-#### Student Repository
+### 4. Build and Run
 
-- **Get Students:** Retrieve a list of all student records.
-
-- **Get Student by ID:** Retrieve details of a specific student by `studentId`.
-
-- **Add Student:** Add a new student to the database.
-
-- **Update Student Department:** Update a student's department by `studentId`.
-
-- **Delete Student by ID:** Remove a student from the database by `studentId`.
-
-#### Event Repository
-
-- **Get Events:** Retrieve a list of all event records.
-
-- **Get Event by ID:** Retrieve details of a specific event by `eventId`.
-
-- **Add Event:** Add a new event to the database.
-
-- **Get Events on the Same Date:** Retrieve events that occur on the specified date.
-
-- **Update Event Location by ID:** Update the location of a specific event by `eventId`.
-
-- **Delete Event by ID:** Remove an event from the database by `eventId`.
-
-### Database Design
-
-The project's database design includes tables for student and event management, each with specific fields. Below are the details of the database design:
-
-#### Student Table
-
-| Column Name      | Data Type       | Description                                  |
-| ---------------- | --------------- | -------------------------------------------- |
-| studentId        | INT (Primary Key)| Unique identifier for each student            |
-| firstName        | VARCHAR(255)    | Student's first name                         |
-| lastName         | VARCHAR(255)    | Student's last name                          |
-| age              | INT             | Student's age                                |
-| studentDepartment| ENUM            | Student's department (ME, ECE, CIVIL, CSE)   |
-| created_at       | TIMESTAMP       | Timestamp of record creation                  |
-| updated_at       | TIMESTAMP       | Timestamp of record modification              |
-
-#### Event Table
-
-| Column Name      | Data Type       | Description                                  |
-| ---------------- | --------------- | -------------------------------------------- |
-| eventId          | INT (Primary Key)| Unique identifier for each event              |
-| eventName        | VARCHAR(255)    | Event name                                   |
-| locationOfEvent  | VARCHAR(255)    | Location of the event                        |
-| eventDate        | DATE            | Date of the event                            |
-| startTime        | TIME            | Start time of the event                      |
-| endTime          | TIME            | End time of the event                        |
-| created_at       | TIMESTAMP       | Timestamp of record creation                  |
-| updated_at       | TIMESTAMP       | Timestamp of record modification              |
-
-
-### Sample H2 Database Queries
-
-
-#### Insert Students
-
-```sql
-INSERT INTO Student (studentId, firstName, lastName, age, studentDepartment)
-VALUES
-    (1, 'John', 'Doe', 20, 'CSE'),
-    (2, 'Alice', 'Johnson', 22, 'ECE');
+#### Using Maven:
+```bash
+./mvnw spring-boot:run
+```
+or
+```bash
+mvn spring-boot:run
 ```
 
-#### Insert Events
+#### Or run from your IDE (IntelliJ, Eclipse, VS Code, etc.)
 
-```sql
-INSERT INTO Event (eventId, eventName, locationOfEvent, eventDate, startTime, endTime)
-VALUES
-    (1, 'Tech Conference', 'Conference Center', '2023-10-15', '09:00:00', '17:00:00'),
-    (2, 'Sports Day', 'Stadium', '2023-11-05', '09:00:00', '16:00:00');
+---
+
+## Usage
+
+1. **Access the app:**  
+   Open [http://localhost:8080](http://localhost:8080) in your browser.
+
+2. **Sign up:**  
+   Register a new account with your first name, last name, email, username, and password.
+
+3. **Login:**  
+   Use your credentials to log in.
+
+4. **Profile:**  
+   Click the Profile button in the navbar to update your details.
+
+5. **Manage Events & Students:**  
+   - Add, edit, or delete events and students.
+   - Register students for events.
+   - View attendees and event details.
+
+6. **Logout:**  
+   Use the Logout button in the navbar to securely log out.
+
+---
+
+## Project Structure
+
+```
+src/
+  main/
+    java/
+      com.geekster.project.assignment.UniversityEventManagement/
+        Controller/      # Web and API controllers
+        Model/           # JPA entities (User, Student, Event, etc.)
+        Repository/      # Spring Data JPA repositories
+        Service/         # Business logic services
+        UniversityEventManagementApplication.java
+    resources/
+      templates/         # Thymeleaf HTML templates
+      application.properties
+  test/
+    java/
+      ...                # Unit and integration tests
 ```
 
-#### Retrieve All Students
+---
 
-```sql
-SELECT * FROM Student;
-```
+## Customization & Extensibility
 
-#### Retrieve All Events
+- **Roles & Permissions:** Easily add user roles (admin, student, etc.) with Spring Security.
+- **Email Verification:** Integrate email for signup confirmation or password reset.
+- **Event Analytics:** Add charts and analytics for event participation.
+- **Calendar View:** Integrate a calendar for event scheduling.
+- **API Endpoints:** RESTful APIs for integration with other systems or a mobile app.
 
-```sql
-SELECT * FROM Event;
-```
+---
 
-#### Retrieve Students by Department
-
-```sql
-SELECT * FROM Student WHERE studentDepartment = 'CSE';
-```
-
-#### Update Student Age
-
-```sql
-UPDATE Student SET age = 21 WHERE studentId = 1;
-```
-
-#### Update Event Location
-
-```sql
-UPDATE Event SET locationOfEvent = 'Indoor Arena' WHERE eventId = 2;
-```
-
-#### Delete Student by ID
-
-```sql
-DELETE
-
- FROM Student WHERE studentId = 2;
-```
-
-#### Delete Event by ID
-
-```sql
-DELETE FROM Event WHERE eventId = 1;
-```
-
-
-### Data Structures Used
-
-The project utilizes the following data structures:
-
-#### Student Class
-
-The `Student` class defines the structure for student data and includes fields such as `studentId`, `firstName`, `lastName`, `age`, `studentDepartment`, and timestamps.
-
-#### Event Class
-
-The `Event` class defines the structure for event data and includes fields such as `eventId`, `eventName`, `locationOfEvent`, `eventDate`, `startTime`, `endTime`, and timestamps.
-
-#### Enumerations
-
-- `studentDepartment` (ME, ECE, CIVIL, CSE): An enumeration representing the departments available for students.
-
-### Project Summary
-
-The University Event Management project is a robust Spring Boot application designed for efficient management of student and event data. It offers a set of RESTful API endpoints for adding, retrieving, updating, and deleting student and event records.
-
-#### Key Technologies Used
-
-- **Framework:** Spring Boot
-- **Language:** Java
-- **Build Tool:** Maven
-
-### Data Flow
-
-#### Controller
-
-The Controller layer handles incoming HTTP requests and routes them to the appropriate services. It defines API endpoints for various operations on students and events.
-
-#### Services
-
-The Services layer implements core business logic, data processing, and interaction with the data repository. It handles data validations, CRUD operations, and data transformations.
-
-#### Repository
-
-The Repository layer manages data access to the underlying H2 Database. It handles database operations for student and event data.
-
-### Database Design
-
-The project's database design includes tables for student and event management, each with specific fields. This design ensures data integrity and organized storage.
-
-### Data Structures Used
-
-The project utilizes data structures such as the `Student` and `Event` classes, along with enumerations, to represent and manage student and event data.
-
-### Key Features
-
-- RESTful API endpoints for student and event management.
-- Comprehensive data validation for student attributes.
-- Structured database design for efficient data storage.
-- Dynamic default values for date and time fields.
-- Clean code separation with a layered architecture (Controller, Services, Repository).
-
-The University Event Management project serves as a practical example of Spring Boot application development, demonstrating best practices in API design and data management. It offers a solid foundation for managing university events and student information efficiently.
-
-<!-- License -->
-## License
-
-This project is licensed under the [BSD 3-Clause License](LICENSE).
-
-<!-- Acknowledgments -->
-## Acknowledgments
-
-Thank you to the Spring Boot and Java communities for providing excellent tools and resources.
-
-<!-- Contact -->
-## Contact
-
-For questions or feedback, please contact [Amit Ashok Swain](mailto:business.amitswain@gmail.com).
+**Enjoy using Uni-Event! If you have questions or want to contribute, feel free to open an issue or pull request.**

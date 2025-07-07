@@ -35,6 +35,11 @@
                         <form th:action="@{/students/add}" th:object="${newStudent}" method="post">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
+                                    <label for="universityId" class="form-label">Student ID *</label>
+                                    <input type="number" class="form-control" id="universityId" th:field="*{universityId}" placeholder="Enter student ID" required>
+                                    <div class="form-text">This must be unique for each student.</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
                                     <label for="firstName" class="form-label">First Name *</label>
                                     <input type="text" class="form-control" id="firstName" th:field="*{firstName}" 
                                            placeholder="Enter first name (capital first letter)" required>
@@ -105,6 +110,46 @@
             </div>
         </div>
 
+        <!-- Search/Filter/Sort Form -->
+        <div class="row mb-3">
+            <div class="col">
+                <form class="d-flex flex-wrap gap-2 align-items-end" method="get" th:action="@{/students}">
+                    <div>
+                        <label for="query" class="form-label mb-0">Search ID or Name</label>
+                        <input type="text" class="form-control" id="query" name="query" th:value="${query}" placeholder="Search by ID or name">
+                    </div>
+                    <div>
+                        <label for="department" class="form-label mb-0">Department</label>
+                        <select class="form-select" id="department" name="department">
+                            <option value="">All</option>
+                            <option th:each="dept : ${departments}" th:value="${dept}" th:text="${dept}" th:selected="${dept == selectedDepartment}"></option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label mb-0">Sort By</label>
+                        <select class="form-select" name="sort">
+                            <option value="universityId" th:selected="${sort == 'universityId'}">ID</option>
+                            <option value="firstName" th:selected="${sort == 'firstName'}">First Name</option>
+                            <option value="lastName" th:selected="${sort == 'lastName'}">Last Name</option>
+                            <option value="age" th:selected="${sort == 'age'}">Age</option>
+                            <option value="studentDepartment" th:selected="${sort == 'studentDepartment'}">Department</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label mb-0">Direction</label>
+                        <select class="form-select" name="dir">
+                            <option value="asc" th:selected="${dir == 'asc'}">Ascending</option>
+                            <option value="desc" th:selected="${dir == 'desc'}">Descending</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Search</button>
+                        <a href="/students" class="btn btn-outline-secondary ms-2">Reset</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- Students Table -->
         <div class="row">
             <div class="col">
@@ -125,16 +170,16 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Name</th>
-                                        <th>Age</th>
-                                        <th>Department</th>
+                                        <th><a th:href="@{/students(sort='universityId', dir=${sort == 'universityId' && dir == 'asc' ? 'desc' : 'asc'}, query=${query}, department=${selectedDepartment})}" style="text-decoration:none;">ID <i class="bi" th:classappend="${sort == 'universityId' ? (dir == 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill') : ''}"></i></a></th>
+                                        <th><a th:href="@{/students(sort='firstName', dir=${sort == 'firstName' && dir == 'asc' ? 'desc' : 'asc'}, query=${query}, department=${selectedDepartment})}" style="text-decoration:none;">Name <i class="bi" th:classappend="${sort == 'firstName' ? (dir == 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill') : ''}"></i></a></th>
+                                        <th><a th:href="@{/students(sort='age', dir=${sort == 'age' && dir == 'asc' ? 'desc' : 'asc'}, query=${query}, department=${selectedDepartment})}" style="text-decoration:none;">Age <i class="bi" th:classappend="${sort == 'age' ? (dir == 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill') : ''}"></i></a></th>
+                                        <th><a th:href="@{/students(sort='studentDepartment', dir=${sort == 'studentDepartment' && dir == 'asc' ? 'desc' : 'asc'}, query=${query}, department=${selectedDepartment})}" style="text-decoration:none;">Department <i class="bi" th:classappend="${sort == 'studentDepartment' ? (dir == 'asc' ? 'bi-caret-up-fill' : 'bi-caret-down-fill') : ''}"></i></a></th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr th:each="student : ${students}">
-                                        <td th:text="${student.studentId}"></td>
+                                        <td th:text="${student.universityId}"></td>
                                         <td>
                                             <strong th:text="${student.firstName + ' ' + student.lastName}"></strong>
                                         </td>
@@ -147,13 +192,13 @@
                                                 <!-- Edit Student Modal Trigger -->
                                                 <button type="button" class="btn btn-sm btn-outline-success" 
                                                         data-bs-toggle="modal" 
-                                                        th:data-bs-target="'#editStudentModal' + ${student.studentId}">
+                                                        th:data-bs-target="'#editStudentModal' + ${student.universityId}">
                                                     <i class="bi bi-pencil-square"></i>
                                                 </button>
                                                 
                                                 <!-- Delete Button -->
                                                 <form th:action="@{/students/delete}" method="post" style="display: inline;">
-                                                    <input type="hidden" name="studentId" th:value="${student.studentId}">
+                                                    <input type="hidden" name="universityId" th:value="${student.universityId}">
                                                     <button type="submit" class="btn btn-sm btn-outline-danger" 
                                                             onclick="return confirmDelete('Are you sure you want to delete this student?')">
                                                         <i class="bi bi-trash"></i>
@@ -162,7 +207,7 @@
                                             </div>
                                             
                                             <!-- Edit Student Modal -->
-                                            <div class="modal fade" th:id="'editStudentModal' + ${student.studentId}" tabindex="-1">
+                                            <div class="modal fade" th:id="'editStudentModal' + ${student.universityId}" tabindex="-1">
                                                 <div class="modal-dialog">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
@@ -171,7 +216,7 @@
                                                         </div>
                                                         <form th:action="@{/students/update}" method="post">
                                                             <div class="modal-body">
-                                                                <input type="hidden" name="studentId" th:value="${student.studentId}">
+                                                                <input type="hidden" name="universityId" th:value="${student.universityId}">
                                                                 <div class="mb-3">
                                                                     <label class="form-label">First Name</label>
                                                                     <input type="text" class="form-control" name="firstName" th:value="${student.firstName}" required>

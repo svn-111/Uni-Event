@@ -4,6 +4,7 @@ import com.geekster.project.assignment.UniversityEventManagement.Model.Departmen
 import com.geekster.project.assignment.UniversityEventManagement.Model.Student;
 import com.geekster.project.assignment.UniversityEventManagement.Repository.IStudentRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,34 +30,46 @@ public class StudentService {
         return studentRepo.findAll();
     }
 
-    public Optional<Student> getStudentById(Integer id){
-        return studentRepo.findById(id);
+    public Optional<Student> getStudentById(Integer universityId){
+        return studentRepo.findById(universityId);
     }
 
-    public  String updateStudentDepartment(Integer id, Department department){
-        Optional<Student> s = studentRepo.findById(id);
-
-        if(s.isEmpty()){
-            return "Student Id not found !!!";
+    public  String updateStudentDepartment(Integer universityId, Department department){
+        Optional<Student> studentOpt = studentRepo.findById(universityId);
+        if(studentOpt.isPresent()){
+            Student s = studentOpt.get();
+            s.setStudentDepartment(department);
+            studentRepo.save(s);
+            return "Department updated";
         }
-
-        Student stu = s.get();
-        stu.setStudentDepartment(department);
-        studentRepo.save(stu);
-        return "Student's Department is Updated !!!";
+        return "Student not found";
     }
 
-    public String removeStudentById(Integer id){
-
-        Student stu = studentRepo.findById(id).orElse(null);
-
-        if(stu==null){
-            return "Student's Id not found";
+    public String removeStudentById(Integer universityId){
+        if(studentRepo.existsById(universityId)){
+            studentRepo.deleteById(universityId);
+            return "Student removed";
         }
-
-        studentRepo.delete(stu);
-
-        return "Student is Removed";
+        return "Student not found";
     }
 
+    public List<Student> searchStudents(String query) {
+        try {
+            Integer id = Integer.parseInt(query);
+            Optional<Student> student = studentRepo.findById(id);
+            return student.map(List::of).orElse(List.of());
+        } catch (NumberFormatException e) {
+            return studentRepo.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(query, query);
+        }
+    }
+    public List<Student> filterByDepartment(Department department) {
+        return studentRepo.findByStudentDepartment(department);
+    }
+    public List<Student> searchAndFilter(Department department, String query) {
+        return studentRepo.findByStudentDepartmentAndFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(department, query, query);
+    }
+    public List<Student> getAllStudentsSorted(String sortBy, boolean asc) {
+        Sort sort = asc ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        return studentRepo.findAll(sort);
+    }
 }

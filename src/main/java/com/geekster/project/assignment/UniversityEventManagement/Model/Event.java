@@ -30,6 +30,7 @@ public class Event {
 
     private LocalTime endTime;
 
+    private Integer capacity;
 }
 
 /*Event Model will have

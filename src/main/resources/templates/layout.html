@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:fragment="head">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -73,9 +73,9 @@
     <!-- Navigation -->
     <nav th:fragment="nav" class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
         <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="bi bi-calendar-event me-2"></i>
-                University Event Management
+            <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/}">
+                <i class="bi bi-calendar-event"></i>
+                Uni-Event
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -96,6 +96,16 @@
                         <a class="nav-link" href="/events">
                             <i class="bi bi-calendar-check me-1"></i>Events
                         </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link d-flex align-items-center gap-1" th:href="@{/profile}">
+                            <i class="bi bi-person-circle"></i> Profile
+                        </a>
+                    </li>
+                    <li class="nav-item d-flex align-items-center" sec:authorize="isAuthenticated()">
+                        <form th:action="@{/logout}" method="post" class="d-inline m-0 p-0">
+                            <button type="submit" class="nav-link btn btn-link p-0 m-0" style="color: inherit; text-decoration: none;">Logout</button>
+                        </form>
                     </li>
                 </ul>
             </div>
@@ -127,15 +137,10 @@
     <footer th:fragment="footer" class="bg-dark text-light py-4 mt-5">
         <div class="container">
             <div class="row">
-                <div class="col-md-6">
-                    <h5>University Event Management</h5>
-                    <p class="mb-0">Streamlining university events and student information management.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p class="mb-0">
-                        <i class="bi bi-gear me-1"></i>
-                        Powered by Spring Boot & Thymeleaf
-                    </p>
+                <div class="col text-center">
+                    <span class="fw-bold">Uni-Event</span>
+                    <br/>
+                    Streamlining university events and student information management.
                 </div>
             </div>
         </div>
