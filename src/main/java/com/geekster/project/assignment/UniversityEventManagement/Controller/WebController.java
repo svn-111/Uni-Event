@@ -269,12 +269,42 @@ public class WebController {
         return "redirect:/events";
     }
 
-    @GetMapping("/events/by-date")
-    public String getEventsByDate(@RequestParam LocalDate date, Model model) {
+    @PostMapping("/events/unregister")
+    public String unregisterStudentFromEvent(@RequestParam Integer universityId, @RequestParam Integer eventId, RedirectAttributes redirectAttributes) {
+        Optional<Student> studentOpt = studentService.getStudentById(universityId);
+        Optional<Event> eventOpt = eventService.getEventById(eventId);
+        if (studentOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Student not found: " + universityId);
+            return "redirect:/events";
+        }
+        if (eventOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Event not found: " + eventId);
+            return "redirect:/events";
+        }
         try {
-            Iterable<Event> events = eventService.getEventsOnSameDate(date);
+            boolean deleted = registrationService.unregisterStudentFromEvent(studentOpt.get(), eventOpt.get());
+            if (deleted) {
+                redirectAttributes.addFlashAttribute("successMessage", "Attendee removed from event.");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "Attendee registration not found.");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error removing attendee: " + e.getMessage());
+        }
+        return "redirect:/events";
+    }
+
+    @GetMapping("/events/by-date")
+    public String getEventsByDate(@RequestParam(required = false) String date, Model model) {
+        try {
+            if (date == null || date.isBlank()) {
+                model.addAttribute("errorMessage", "No date provided.");
+                return "events";
+            }
+            java.time.LocalDate parsedDate = java.time.LocalDate.parse(date);
+            Iterable<Event> events = eventService.getEventsOnSameDate(parsedDate);
             model.addAttribute("events", events);
-            model.addAttribute("selectedDate", date);
+            model.addAttribute("selectedDate", parsedDate);
             model.addAttribute("newEvent", new Event());
         } catch (Exception e) {
             model.addAttribute("errorMessage", "Error fetching events: " + e.getMessage());

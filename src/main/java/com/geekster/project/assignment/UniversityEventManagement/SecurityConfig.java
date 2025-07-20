@@ -2,6 +2,7 @@ package com.geekster.project.assignment.UniversityEventManagement;
 
 import com.geekster.project.assignment.UniversityEventManagement.Service.UserService;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -38,7 +39,7 @@ public class SecurityConfig {
                 .permitAll()
             )
             .csrf(csrf -> csrf.ignoringRequestMatchers(new AntPathRequestMatcher("/h2-console/**")))
-            .headers(headers -> headers.frameOptions().sameOrigin());
+            .headers(headers -> headers.frameOptions(Customizer.withDefaults()));
         return http.build();
     }
 

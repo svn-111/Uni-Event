@@ -11,4 +11,5 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     List<Registration> findByStudent(Student student);
     boolean existsByStudentAndEvent(Student student, Event event);
     long countByEvent(Event event);
+    void deleteByStudentAndEvent(Student student, Event event);
 } 

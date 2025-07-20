@@ -42,4 +42,15 @@ public class RegistrationService {
     public long getRegistrationCountForEvent(Event event) {
         return registrationRepository.countByEvent(event);
     }
+
+    public boolean unregisterStudentFromEvent(Student student, Event event) {
+        List<Registration> regs = registrationRepository.findByEvent(event);
+        for (Registration reg : regs) {
+            if (reg.getStudent().getUniversityId().equals(student.getUniversityId())) {
+                registrationRepository.delete(reg);
+                return true;
+            }
+        }
+        return false;
+    }
 } 

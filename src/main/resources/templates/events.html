@@ -118,7 +118,7 @@
                         <div th:if="${selectedDate}" class="alert alert-info">
                             <small>
                                 <i class="bi bi-calendar me-1"></i>
-                                Showing events for: <strong th:text="${#dates.format(selectedDate, 'dd MMM yyyy')}"></strong>
+                                Showing events for: <strong th:text="${selectedDate != null ? T(java.time.format.DateTimeFormatter).ofPattern('dd MMM yyyy').format(selectedDate) : ''}"></strong>
                             </small>
                         </div>
                     </div>
@@ -173,113 +173,35 @@
                                             </small>
                                         </td>
                                         <td>
-                                            <div class="mb-2">
-                                                <form th:action="@{/events/register}" method="post" class="row g-2 align-items-center mb-2">
-                                                    <input type="hidden" name="eventId" th:value="${event.eventId}">
-                                                    <div class="col-auto">
-                                                        <label th:for="'studentSearchInput-' + ${event.eventId}" class="form-label mb-0 me-2">Student ID:</label>
-                                                    </div>
-                                                    <div class="col-auto">
-                                                        <div class="input-group input-group-sm">
-                                                            <input type="text" class="form-control" th:id="'studentSearchInput-' + ${event.eventId}" placeholder="Enter ID">
-                                                            <button type="button" class="btn btn-outline-secondary" th:onclick="'searchStudentInDropdown(' + ${event.eventId} + ')'"><i class="bi bi-search"></i></button>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-auto">
-                                                        <select class="form-select form-select-sm" th:id="'studentDropdown-' + ${event.eventId}" name="universityId" required style="min-width: 180px;">
-                                                            <option value="">Select Student</option>
-                                                            <option th:each="student : ${students}" th:value="${student.universityId}" th:text="${student.universityId + ' - ' + student.firstName + ' ' + student.lastName}"></option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-auto">
-                                                        <button type="submit" class="btn btn-primary btn-sm">Register</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                            <div>
-                                                <span class="badge bg-secondary">Capacity: <span th:text="${event.capacity}"></span></span>
-                                                <span class="badge bg-success">Registered: <span th:text="${eventRegistrationCounts[event.eventId]}"></span></span>
-                                                <span class="badge bg-warning text-dark">
-                                                    Available:
-                                                    <span th:text="${event.capacity != null && eventRegistrationCounts[event.eventId] != null ? event.capacity - eventRegistrationCounts[event.eventId] : (event.capacity != null ? event.capacity : 0)}"></span>
-                                                </span>
-                                            </div>
-                                            <div class="mt-2">
+                                            <div class="btn-group" role="group">
+                                                <!-- Register Button (opens modal) -->
+                                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" th:data-bs-target="'#registerModal' + ${event.eventId}">
+                                                    <i class="bi bi-person-plus"></i> Register
+                                                </button>
+                                                <!-- View Attendees Button -->
                                                 <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" th:data-bs-target="'#attendeesModal' + ${event.eventId}">
                                                     <i class="bi bi-people"></i> View Attendees
                                                 </button>
-                                            </div>
-                                            <!-- Edit Event Modal Trigger and Delete Button (existing code) -->
-                                            <div class="btn-group mt-2" role="group">
-                                                <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" th:data-bs-target="'#editEventModal' + ${event.eventId}"><i class="bi bi-pencil-square"></i></button>
+                                                <!-- Edit Button -->
+                                                <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" th:data-bs-target="'#editEventModal' + ${event.eventId}">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </button>
+                                                <!-- Delete Button -->
                                                 <form th:action="@{/events/delete}" method="post" style="display: inline;">
                                                     <input type="hidden" name="eventId" th:value="${event.eventId}">
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirmDelete('Are you sure you want to delete this event?')"><i class="bi bi-trash"></i></button>
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirmDelete('Are you sure you want to delete this event?')">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
                                                 </form>
                                             </div>
-                                            <!-- Edit Event Modal (existing code) -->
-                                            <div class="modal fade" th:id="'editEventModal' + ${event.eventId}" tabindex="-1">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title">Edit Event</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                        </div>
-                                                        <form th:action="@{/events/update}" method="post">
-                                                            <div class="modal-body">
-                                                                <input type="hidden" name="eventId" th:value="${event.eventId}">
-                                                                <div class="mb-3">
-                                                                    <label class="form-label">Event Name</label>
-                                                                    <input type="text" class="form-control" name="eventName" th:value="${event.eventName}" required>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <label class="form-label">Location</label>
-                                                                    <input type="text" class="form-control" name="locationOfEvent" th:value="${event.locationOfEvent}" required>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <label class="form-label">Event Date</label>
-                                                                    <input type="date" class="form-control" name="eventDate" th:value="${event.eventDate}" required>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <label class="form-label">Start Time</label>
-                                                                    <input type="time" class="form-control" name="startTime" th:value="${event.startTime}" required>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <label class="form-label">End Time</label>
-                                                                    <input type="time" class="form-control" name="endTime" th:value="${event.endTime}" required>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <label class="form-label">Capacity</label>
-                                                                    <input type="number" class="form-control" name="capacity" th:value="${event.capacity}" min="1" required>
-                                                                </div>
-                                                            </div>
-                                                            <div class="modal-footer">
-                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                                <button type="submit" class="btn btn-success">Update Event</button>
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <!-- Attendees Modal -->
-                                            <div class="modal fade" th:id="'attendeesModal' + ${event.eventId}" tabindex="-1">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title">Attendees for <span th:text="${event.eventName}"></span></h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <ul th:if="${!#lists.isEmpty(eventAttendees[event.eventId])}" class="list-group">
-                                                                <li th:each="attendee : ${eventAttendees[event.eventId]}" class="list-group-item" th:text="${attendee.universityId + ' - ' + attendee.firstName + ' ' + attendee.lastName}"></li>
-                                                            </ul>
-                                                            <div th:if="${#lists.isEmpty(eventAttendees[event.eventId])}" class="text-muted">No attendees yet.</div>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                            <!-- Event stats badges -->
+                                            <div class="mt-2">
+                                                <span class="badge bg-secondary">Capacity: <span th:text="${event.capacity}"></span></span>
+                                                <span class="badge bg-success">Registered: <span th:text="${eventRegistrationCounts != null ? eventRegistrationCounts[event.eventId] : 0}"></span></span>
+                                                <span class="badge bg-warning text-dark">
+                                                    Available:
+                                                    <span th:text="${event.capacity != null && eventRegistrationCounts != null && eventRegistrationCounts[event.eventId] != null ? event.capacity - eventRegistrationCounts[event.eventId] : (event.capacity != null ? event.capacity : 0)}"></span>
+                                                </span>
                                             </div>
                                         </td>
                                     </tr>
@@ -290,6 +212,117 @@
                 </div>
             </div>
         </div>
+
+        <!-- After the table, outside of any <tr> or <td>: -->
+        <div th:each="event : ${events}">
+          <div class="modal fade" th:id="'registerModal' + ${event.eventId}" tabindex="-1">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Register Student for <span th:text="${event.eventName}"></span></h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/events/register}" method="post">
+                  <div class="modal-body">
+                    <input type="hidden" name="eventId" th:value="${event.eventId}">
+                    <div class="mb-3">
+                      <label th:for="'studentSearchInput-' + ${event.eventId}" class="form-label">Search Student by ID</label>
+                      <div class="input-group">
+                        <input type="text" class="form-control" th:id="'studentSearchInput-' + ${event.eventId}" placeholder="Enter ID">
+                        <button type="button" class="btn btn-outline-secondary" th:attr="onclick='searchStudentInDropdown(' + ${event.eventId} + ')'">
+                            <i class="bi bi-search"></i>
+                        </button>
+                      </div>
+                      <div class="text-danger mt-1" th:id="'noStudentMsg-' + ${event.eventId}" style="display:none;">No people found</div>
+                    </div>
+                    <div class="mb-3">
+                      <label th:for="'studentDropdown-' + ${event.eventId}" class="form-label">Select Student</label>
+                      <select class="form-select" th:id="'studentDropdown-' + ${event.eventId}" name="universityId" required>
+                        <option value="">Select Student</option>
+                        <option th:each="student : ${students}" th:value="${student.universityId}" th:text="${student.universityId + ' - ' + student.firstName + ' ' + student.lastName}"></option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Register</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="modal fade" th:id="'editEventModal' + ${event.eventId}" tabindex="-1">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Edit Event</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/events/update}" method="post">
+                  <div class="modal-body">
+                    <input type="hidden" name="eventId" th:value="${event.eventId}">
+                    <div class="mb-3">
+                      <label class="form-label">Event Name</label>
+                      <input type="text" class="form-control" name="eventName" th:value="${event.eventName}" required>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Location</label>
+                      <input type="text" class="form-control" name="locationOfEvent" th:value="${event.locationOfEvent}" required>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Event Date</label>
+                      <input type="date" class="form-control" name="eventDate" th:value="${event.eventDate}" required>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Start Time</label>
+                      <input type="time" class="form-control" name="startTime" th:value="${event.startTime}" required>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">End Time</label>
+                      <input type="time" class="form-control" name="endTime" th:value="${event.endTime}" required>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Capacity</label>
+                      <input type="number" class="form-control" name="capacity" th:value="${event.capacity}" min="1" required>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Update Event</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="modal fade" th:id="'attendeesModal' + ${event.eventId}" tabindex="-1">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Attendees for <span th:text="${event.eventName}"></span></h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                  <ul th:if="${eventAttendees != null and !#lists.isEmpty(eventAttendees[event.eventId])}" class="list-group">
+                    <li th:each="attendee : ${eventAttendees != null ? eventAttendees[event.eventId] : {}}" class="list-group-item d-flex justify-content-between align-items-center">
+                      <span th:text="${attendee.universityId + ' - ' + attendee.firstName + ' ' + attendee.lastName}"></span>
+                      <form th:action="@{/events/unregister}" method="post" style="display:inline;">
+                        <input type="hidden" name="universityId" th:value="${attendee.universityId}">
+                        <input type="hidden" name="eventId" th:value="${event.eventId}">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Remove this attendee?')">
+                          <i class="bi bi-x-circle"></i>
+                        </button>
+                      </form>
+                    </li>
+                  </ul>
+                  <div th:if="${eventAttendees == null or #lists.isEmpty(eventAttendees[event.eventId])}" class="text-muted">No attendees yet.</div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
     </div>
 
     <th:block th:replace="~{layout :: footer}"></th:block>
@@ -298,17 +331,24 @@
 function searchStudentInDropdown(eventId) {
     var input = document.getElementById('studentSearchInput-' + eventId);
     var dropdown = document.getElementById('studentDropdown-' + eventId);
+    var msg = document.getElementById('noStudentMsg-' + eventId);
     var searchValue = input.value.trim();
-    if (!searchValue) return;
+    var found = false;
     for (var i = 0; i < dropdown.options.length; i++) {
         if (dropdown.options[i].value === searchValue) {
             dropdown.selectedIndex = i;
+            input.value = dropdown.options[i].text;
             dropdown.classList.add('is-valid');
-            return;
+            msg.style.display = 'none';
+            found = true;
+            break;
         }
     }
-    dropdown.selectedIndex = 0;
-    dropdown.classList.remove('is-valid');
+    if (!found) {
+        dropdown.selectedIndex = 0;
+        dropdown.classList.remove('is-valid');
+        msg.style.display = '';
+    }
 }
 </script>
 </body>

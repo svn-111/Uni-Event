@@ -1,0 +1,7 @@
+[
+  {"eventId": 201, "eventName": "Tech Talk", "locationOfEvent": "Auditorium", "eventDate": "2025-08-01", "startTime": "10:00", "endTime": "12:00", "capacity": 100},
+  {"eventId": 202, "eventName": "Robotics Workshop", "locationOfEvent": "Lab 1", "eventDate": "2025-08-02", "startTime": "14:00", "endTime": "16:00", "capacity": 50},
+  {"eventId": 203, "eventName": "Cultural Fest", "locationOfEvent": "Open Ground", "eventDate": "2025-08-03", "startTime": "09:00", "endTime": "18:00", "capacity": 300},
+  {"eventId": 204, "eventName": "Math Olympiad", "locationOfEvent": "Room 101", "eventDate": "2025-08-04", "startTime": "11:00", "endTime": "13:00", "capacity": 80},
+  {"eventId": 205, "eventName": "Startup Meetup", "locationOfEvent": "Conference Hall", "eventDate": "2025-08-05", "startTime": "15:00", "endTime": "17:00", "capacity": 120}
+] 

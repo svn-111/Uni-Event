@@ -1,0 +1,7 @@
+[
+  {"universityId": 101, "firstName": "Alice", "lastName": "Smith", "age": 20, "studentDepartment": "CSE"},
+  {"universityId": 102, "firstName": "Bob", "lastName": "Johnson", "age": 21, "studentDepartment": "ECE"},
+  {"universityId": 103, "firstName": "Carol", "lastName": "Williams", "age": 22, "studentDepartment": "ME"},
+  {"universityId": 104, "firstName": "David", "lastName": "Brown", "age": 19, "studentDepartment": "CIVIL"},
+  {"universityId": 105, "firstName": "Eve", "lastName": "Davis", "age": 23, "studentDepartment": "CSE"}
+] 
